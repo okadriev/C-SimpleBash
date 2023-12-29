@@ -51,38 +51,40 @@ flags get_flag(char c[], flags flag) {
           break;
       }
     }
+  if (flag.b) flag.n = 0;
+
   return flag;
 }
 
 void print_f(char *fil, flags flag) {
   // printf("b = %d, e = %d, n = %d, s = %d, t = %d, v = %d\n", flag.b, flag.e,
-  // flag.n, flag.s, flag.t,
-  //        flag.v);
+  //        flag.n, flag.s, flag.t, flag.v);
   FILE *f = fopen(fil, "r");
   if (f == NULL) {
     fprintf(stderr, "cat: %s: No such file or directory\n", fil);
-    // exit(1);
   }
 
   int ch0 = ' ', ch1 = '\n', ch2, str_count = 0;
-  while ((ch2 = fgetc(f)) != EOF) {
-    if (flag.b && ch2 != '\n' && ch1 == '\n')
-      printf("%d ", ++str_count);
-    else if (flag.n && ch1 == '\n')
-      printf("%d ", ++str_count);
 
+  while ((ch2 = fgetc(f)) != EOF) {
     if (flag.s == 0 || ch0 != '\n' || ch1 != '\n' || ch2 != '\n') {
+      if (flag.b && ch2 != '\n' && ch1 == '\n') printf("%6d\t", ++str_count);
+
+      if (flag.n && ch1 == '\n') printf("%6d\t", ++str_count);
+
       if (flag.e && ch2 == '\n') printf("$");
-      if (flag.t && ch2 == '\t')
-        printf("^I");
-      else if (flag.v &&
-               ((ch2 < 32 && ch2 != '\n' && ch2 != '\t') || ch2 == 127))
-        // if (ch2 > 127 && ch2 < 160) printf("M-^");
-        printf("^%c", ch2 == 127 ? ch2 - 128 + 64 : ch2 + 64);
-      // if ((c < 32 || (c > 126 && c < 160)) && c != '\n' && c != '\t') c = c >
-      // 126 ? c - 128 + 64 : c + 64;
-      else
-        printf("%c", ch2);
+
+      if (flag.t && ch2 == '\t') {
+        printf("^");
+        ch2 += 64;
+      }
+
+      if (flag.v && ((ch2 < 32 && ch2 != '\n' && ch2 != '\t') || ch2 == 127)) {
+        printf("^");
+        ch2 = ch2 == 127 ? ch2 - 128 + 64 : ch2 + 64;
+      }
+
+      printf("%c", ch2);
     }
 
     ch0 = ch1;
