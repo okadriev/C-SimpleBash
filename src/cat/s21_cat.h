@@ -1,11 +1,17 @@
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct flags {
+typedef struct Flags {
   int b, e, n, s, t, v;
-} flags;
+} Flags;
 
-flags get_flag(char c[], flags flag, int *wrong_flag);
-void print_f(char *fil, flags flag);
-void print_ch(int ch0, int ch1, int ch2, flags flag);
+static struct option long_opt[] = {{"number-nonblank", 0, NULL, 'b'},
+                                   {"number", 0, NULL, 'n'},
+                                   {"squeeze-blank", 0, NULL, 's'},
+                                   {0, 0, 0, 0}};
+
+Flags get_flag(int argc, char *argv[], Flags flag, int *Error);
+void print_file(char *filename, Flags flag);
+void print_ch(FILE *file, Flags flag);
