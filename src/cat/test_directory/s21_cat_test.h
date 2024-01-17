@@ -5,11 +5,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define S21_OUTPUT "S21_output.txt"
-#define CAT_OUTPUT "cat_output.txt"
-#define TEST_FILES                                                           \
-  "test-samples/test_1.txt test-samples/test_2.txt test-samples/test_3.txt " \
-  "test-samples/test_4.txt test-samples/test_5.txt"
+#define S21_OUTPUT "testing/test-samples/s21_output.txt"
+#define CAT_OUTPUT "testing/test-samples/cat_output.txt"
+#define TEST_FILES                                                   \
+  "testing/test-samples/test_1.txt testing/test-samples/test_2.txt " \
+  "testing/test-samples/test_3.txt "                                 \
+  "testing/test-samples/test_4.txt testing/test-samples/test_5.txt"
 
 const char flags[11][30] = {"-b ",
                             "-e ",

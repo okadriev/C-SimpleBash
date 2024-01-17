@@ -45,7 +45,9 @@ void start_testing(int option) {
       printf("\033[42m\033[1;37mSUCCESS :)\033[0m\n");
     }
   }
+
   paint_tyan();
+  system("rm -rf testing/test-samples/");
 }
 
 void system_call(char* line_flags) {
@@ -130,25 +132,25 @@ void create_tests() {
 }
 
 void create_dir() {
-  if (mkdir("test-samples", 0777) == 0) {
+  if (mkdir("testing/test-samples", 0777) == 0) {
     printf("Folder created\n");
   }
 }
 
 void create_test_1() {
-  FILE* f = fopen("test-samples/test_1.txt", "w");
+  FILE* f = fopen("testing/test-samples/test_1.txt", "w");
   fprintf(f, "\nabc end\n\n\nabcabcabc end\n\n\n\nabcabcabcabc end\n\n");
   fclose(f);
 }
 
 void create_test_2() {
-  FILE* f = fopen("test-samples/test_2.txt", "w");
+  FILE* f = fopen("testing/test-samples/test_2.txt", "w");
   fprintf(f, "tab	tab	end\n\nabc tab	1abc end\nabc end\n\n");
   fclose(f);
 }
 
 void create_test_3() {
-  FILE* f = fopen("test-samples/test_3.txt", "w");
+  FILE* f = fopen("testing/test-samples/test_3.txt", "w");
 
   for (int ch = 0; ch < 128; ch++) {
     fprintf(f, "%c", ch);
@@ -158,7 +160,7 @@ void create_test_3() {
 }
 
 void create_test_4() {
-  FILE* f = fopen("test-samples/test_4.txt", "w");
+  FILE* f = fopen("testing/test-samples/test_4.txt", "w");
   fprintf(f,
           "	\n    		\n            			\n             "
           "           				\n                             "
@@ -167,6 +169,6 @@ void create_test_4() {
 }
 
 void create_test_5() {
-  FILE* f = fopen("test-samples/test_5.txt", "w");
+  FILE* f = fopen("testing/test-samples/test_5.txt", "w");
   fclose(f);
 }
