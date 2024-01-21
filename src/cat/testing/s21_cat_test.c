@@ -3,7 +3,7 @@
 int main(int argc, char* option[]) {
   if (argc == 2 && option[1][0] >= '0' && option[1][0] <= '3') {
     create_tests();
-    start_testing(option[1][0]);
+    start_testing(option[1][0] - '0');
   } else {
     printf("Wrong argument (add num of flags 0-3)\n");
   }
@@ -12,7 +12,7 @@ int main(int argc, char* option[]) {
 }
 
 void start_testing(int option) {
-  for (int flags_count = 0; flags_count <= option - '0'; flags_count++) {
+  for (int flags_count = 0; flags_count <= option; flags_count++) {
     int tests_count = 1;
 
     for (int i = 0; i < flags_count; i++) tests_count *= 11;
@@ -47,7 +47,7 @@ void start_testing(int option) {
   }
 
   paint_tyan();
-  system("rm -rf testing/test-samples/");
+  system("rm -rf " PATH);
 }
 
 void system_call(char* line_flags) {
@@ -132,25 +132,26 @@ void create_tests() {
 }
 
 void create_dir() {
+  mkdir("testing", 0777);
   if (mkdir("testing/test-samples", 0777) == 0) {
     printf("Folder created\n");
   }
 }
 
 void create_test_1() {
-  FILE* f = fopen("testing/test-samples/test_1.txt", "w");
+  FILE* f = fopen(PATH "test_1.txt", "w");
   fprintf(f, "\nabc end\n\n\nabcabcabc end\n\n\n\nabcabcabcabc end\n\n");
   fclose(f);
 }
 
 void create_test_2() {
-  FILE* f = fopen("testing/test-samples/test_2.txt", "w");
+  FILE* f = fopen(PATH "test_2.txt", "w");
   fprintf(f, "tab	tab	end\n\nabc tab	1abc end\nabc end\n\n");
   fclose(f);
 }
 
 void create_test_3() {
-  FILE* f = fopen("testing/test-samples/test_3.txt", "w");
+  FILE* f = fopen(PATH "test_3.txt", "w");
 
   for (int ch = 0; ch < 128; ch++) {
     fprintf(f, "%c", ch);
@@ -160,7 +161,7 @@ void create_test_3() {
 }
 
 void create_test_4() {
-  FILE* f = fopen("testing/test-samples/test_4.txt", "w");
+  FILE* f = fopen(PATH "test_4.txt", "w");
   fprintf(f,
           "	\n    		\n            			\n             "
           "           				\n                             "
@@ -169,6 +170,6 @@ void create_test_4() {
 }
 
 void create_test_5() {
-  FILE* f = fopen("testing/test-samples/test_5.txt", "w");
+  FILE* f = fopen(PATH "test_5.txt", "w");
   fclose(f);
 }

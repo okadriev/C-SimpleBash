@@ -22,9 +22,9 @@
 const char flags[FLAGS_COUNT][4] = {"-i ", "-v ", "-c ", "-l ", "-n ",
                                     "-h ", "-s ", "-o ", "-e ", "-f "};
 
-void start_testing(int param);
-void system_call(char* line_flags);
-int file_compare();
+void start_testing(int param, int valgrind);
+void system_call(char* line_flags, int valgrind);
+int file_compare(int valgrind);
 void paint_pikachu();
 void paint_tyan();
 void create_dir();

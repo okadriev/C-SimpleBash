@@ -1,34 +1,61 @@
 #include "s21_grep_test.h"
 
-int main(int argc, char* option[]) {
-  int param = -1;
+int main(int argc, char* argv[]) {
   create_tests();
-  if (argc == 2 && option[1][0] >= '0' && option[1][0] <= '5') {
-    start_testing(option[1][0]);
-  } else {
-    while (param < 0 || param > 5) {
-      printf("Add num of flags 0-4)\n");
-      scanf("%d", &param);
+
+  if (argc > 1 && argv[1][0] >= '0' && argv[1][0] <= '5') {
+    if (argc == 3 && (argv[2][0] == '0' || argv[2][0] == '1')) {
+      start_testing(argv[1][0] - '0', argv[2][0] - '0');
+    } else {
+      start_testing(argv[1][0] - '0', 0);
     }
-    start_testing(param);
+  } else if (argc == 2 && strcmp(argv[1], "girl") == 0) {
+    paint_tyan();
+  } else if (argc == 2 && strcmp(argv[1], "pika") == 0) {
+    paint_pikachu(0);
+  } else {
+    int option = -1, valgrind = -1;
+
+    printf("Add max num of flags to test (0-4)\n");
+    while (option < 0 || option > 5) {
+      option = getchar() - '0';
+      if (option < 0 || option > 5) {
+        printf("You're miss :( Try again, you can do it!\n");
+        while (getchar() != '\n') continue;
+      }
+    }
+
+    printf("Also test with Valgrind? (0/1)\n");
+    while (valgrind != 1 && valgrind != 0) {
+      valgrind = getchar() - '0';
+      if (option < 0 || option > 1) {
+        printf("You're miss :( Try again, you can do it!\n");
+        while (getchar() != '\n') continue;
+      }
+    }
+
+    start_testing(option, valgrind);
   }
+
+  printf("\t\t\tCreated by huldades and lorindab\n");
 
   return 0;
 }
 
-void start_testing(int option) {
-  for (int max_flags = 0; max_flags <= option - '0'; max_flags++) {
+void start_testing(int option, int valgrind) {
+  for (int max_flags = 0; max_flags <= option; max_flags++) {
     int tests_count = 1;
 
     for (int i = 0; i < max_flags; i++) tests_count *= FLAGS_COUNT;
 
     for (int test_id = 0; test_id < tests_count; test_id++) {
       printf("\033[1;37mTest %3d / %3d: \033[0m", test_id + 1, tests_count);
-      srand(time(NULL));
+      srand((int)time(NULL) + test_id);  // for preset random use (test_id) only
 
       char line_flags[200] = {0};
       int copy_id = test_id, param = 1;
       char ch[2] = {0, '\0'};  // grep
+
       for (int j = 0; j < max_flags; j++) {
         int flag_id = copy_id % FLAGS_COUNT;
         strcat(line_flags, flags[flag_id]);
@@ -50,20 +77,20 @@ void start_testing(int option) {
           param = 0;                                                     // grep
         }                                                                // grep
       }
-      if (param)                                    // grep
-        for (int i = rand() % 3 + 1; i > 0; i--) {  // grep
-          do ch[0] = rand() % 128;                  // grep
-          while (!isalnum(ch[0]));                  // grep
-          strcat(line_flags, ch);                   // grep
-        }                                           // grep
+
+      for (int i = rand() % 3 + 1; param && i > 0; i--) {  // grep
+        do ch[0] = rand() % 128;                           // grep
+        while (!isalnum(ch[0]));                           // grep
+        strcat(line_flags, ch);                            // grep
+      }                                                    // grep
 
       strcat(line_flags, " ");
-      system_call(line_flags);
+      system_call(line_flags, valgrind);
 
-      int error = file_compare();
+      int error = file_compare(valgrind);
 
       if (error) {
-        paint_pikachu();
+        paint_pikachu(1);
 
         // if (max_flags > 0)  // grep
         printf("\033[1;37mWrong flag: %s\033[0m\n", line_flags);
@@ -83,7 +110,7 @@ void start_testing(int option) {
   system("rm -rf testing/test-samples/");
 }
 
-void system_call(char* line_flags) {
+void system_call(char* line_flags, int valgrind) {
   char command[BUFSIZ] = {0};
 
   sprintf(command, "./s21_grep %s %s > %s", line_flags, TEST_FILES, S21_OUTPUT);
@@ -94,18 +121,19 @@ void system_call(char* line_flags) {
   printf("%s\n", command);
   system(command);
 
-  sprintf(command, VALGRIND "./s21_grep %s %s > %s 2>&1", line_flags,
-          TEST_FILES, VALGRIND_OUTPUT);
-  printf("%s\n", command);
-  system(command);
+  if (valgrind) {
+    sprintf(command, VALGRIND "./s21_grep %s %s > %s 2>&1", line_flags,
+            TEST_FILES, VALGRIND_OUTPUT);
+    printf("%s\n", command);
+    system(command);
+  }
 }
 
-int file_compare() {
+int file_compare(int valgrind) {
   int error = 0;
 
   FILE* s21_file = fopen(S21_OUTPUT, "r");
   FILE* grep_file = fopen(GREP_OUTPUT, "r");
-  FILE* valgrind_file = fopen(VALGRIND_OUTPUT, "r");
 
   while (1) {
     int ch1 = fgetc(s21_file);
@@ -118,23 +146,29 @@ int file_compare() {
     }
   }
 
-  char str_find[100] = "All heap blocks were freed -- no leaks are possible";
-  char str_read[100] = {0};
-  while (fgets(str_read, 100, valgrind_file) != NULL) {
-    if (strstr(str_find, str_read) != 0) {
-      error += 2;
-      break;
-    }
-  }
-
   fclose(s21_file);
   fclose(grep_file);
-  fclose(valgrind_file);
+
+  if (valgrind) {
+    FILE* valgrind_file = fopen(VALGRIND_OUTPUT, "r");
+
+    const char noleaks[100] =
+        "All heap blocks were freed -- no leaks are possible";
+    char line[100] = {0};
+    int no_leaks = 0;
+
+    while (fgets(line, 100, valgrind_file) != NULL && !no_leaks)
+      if (strstr(line, noleaks) != NULL) no_leaks = 1;
+
+    if (!no_leaks) error += 2;
+
+    fclose(valgrind_file);
+  }
 
   return error;
 }
 
-void paint_pikachu() {
+void paint_pikachu(int param) {
   printf("\n");
   printf("\033[48;5;226m\033[1;30m⡏⠉⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿\033[0m\n");
   printf("\033[48;5;226m\033[1;30m⣿⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⠀⣿\033[0m\n");
@@ -147,7 +181,7 @@ void paint_pikachu() {
   printf("\033[48;5;226m\033[1;30m⣿⣿⣿⡀⠉⠀⠀⠀⠀⠀⢄⠀⢀⠀⠀⠀⠀⠉⠉⠁⠀⠀⣿⣿⣿\033[0m\n");
   printf("\033[48;5;226m\033[1;30m⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿\033[0m\n");
   printf("\033[48;5;226m\033[1;30m⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿\033[0m\n");
-  printf("\033[41m\033[1;37m        FAILED :(        \033[0m\n");
+  if (param) printf("\033[41m\033[1;37m        FAILED :(        \033[0m\n");
 }
 
 void paint_tyan() {
@@ -207,7 +241,7 @@ void create_test_3() {
   /* for (int ch = 0; ch < 128; ch++) {  // ascii
     fprintf(f, "%c", ch);
   } */
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 2000; i++) {           // grep
     int ch = rand() % 128;                   // grep
     while (!isalnum(ch)) ch = rand() % 128;  // grep
     fprintf(f, "%c", ch);                    // grep

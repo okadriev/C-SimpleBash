@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 
-all: s21_cat test_compile
+all: clean s21_cat test_compile
 s21_cat:
 	gcc -Wall -Wextra -Werror -std=c11 s21_cat.c -o s21_cat
 
@@ -12,4 +12,4 @@ test:
 
 re: clean all
 clean:
-	rm -f s21_cat cat_test
+	rm -rf s21_cat cat_test

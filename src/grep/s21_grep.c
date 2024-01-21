@@ -3,7 +3,6 @@
 int main(int argc, char *argv[]) {
   int ERROR = 0;
   char *patterns = calloc(100, sizeof(char));
-  strcpy(patterns, "(");
 
   Flags flag = get_flags(argc, argv, &ERROR, &patterns);
 
@@ -108,10 +107,10 @@ void add_pattern(char *line, char **patterns, int *patterns_count) {
   if (temp[0] == '\0' || temp[0] == '\n') strcpy(temp, "$");
   if (temp[strlen(temp) - 1] == '\n') temp[strlen(temp) - 1] = '\0';
 
-  strcat(temp, ")|(");
-
   pattern_line_realloc(patterns, temp);
-  strcat(*patterns, temp);
+
+  sprintf(*patterns + strlen(*patterns), "%s\\(%s\\)",
+          *patterns_count ? "\\|" : "", temp);
 
   (*patterns_count)++;
   free(temp);
@@ -120,17 +119,16 @@ void add_pattern(char *line, char **patterns, int *patterns_count) {
 void pattern_line_realloc(char **patterns, char *optarg) {
   static size_t current_length = 100;
 
-  while (strlen(*patterns) + strlen(optarg) + 2 > current_length) {
+  while (strlen(*patterns) + strlen(optarg) + 10 > current_length) {
     current_length *= 2;
     *patterns = (char *)realloc(*patterns, current_length * sizeof(char *));
   }
 }
 
 regex_t precompiler(Flags flag, char *patterns, int *ERROR) {
-  patterns[strlen(patterns) - 2] = '\0';
-
   regex_t regex;
-  *ERROR = regcomp(&regex, patterns, REG_EXTENDED | (flag.i ? REG_ICASE : 0));
+  // printf("%s\n(%ld)\n", patterns, strlen(patterns));  // help
+  *ERROR = regcomp(&regex, patterns, (flag.i ? REG_ICASE : 0));
   if (*ERROR) fprintf(stderr, "regcomp error\n");
 
   return regex;
