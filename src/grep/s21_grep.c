@@ -3,7 +3,7 @@
 int main(int argc, char *argv[]) {
   int ERROR = 0;
   char *patterns = calloc(100, sizeof(char));
-
+  
   Flags flag = get_flags(argc, argv, &ERROR, &patterns);
 
   if (!ERROR) {
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     regfree(&regex);
   }
 
-  free(patterns);
+    free(patterns);
   return !ERROR;
 }
 
@@ -187,18 +187,20 @@ void output(FILE *file, char *filename, Flags flag, regex_t regex) {
 void process_flag_o(char *line, int line_count, char *filename, Flags flag,
                     regex_t regex) {
   regmatch_t match = {0};
-  int curr_ch = 0;
 
-  while (regexec(&regex, line + curr_ch, 1, &match, REG_NOTEOL) == 0) {
+  while ((regexec(&regex, line, 1, &match, REG_NOTEOL) == 0) && strlen(line)) {
+    int match_len = match.rm_eo - match.rm_so;
+
+    if (match_len == 0) {
+      line++;
+      continue;  // Пропускаем нулевые совпадения
+    } else
+      line += match.rm_so;
+
     if (flag.multi_file && !flag.h) printf("%s:", filename);
-
     if (flag.n) printf("%d:", line_count);
+    printf("%.*s\n", match_len, line);
 
-    char *temp = strdup(line + curr_ch + match.rm_so);
-    temp[match.rm_eo - match.rm_so] = '\0';
-    printf("%s\n", temp);
-
-    free(temp);
-    curr_ch += match.rm_eo;
+    line += match_len;
   }
 }

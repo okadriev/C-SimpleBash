@@ -54,9 +54,11 @@ void system_call(char* line_flags) {
   char command[BUFSIZ] = {0};
 
   sprintf(command, "./s21_cat %s %s > %s", line_flags, TEST_FILES, S21_OUTPUT);
+  printf("%s", command);
   system(command);
 
   sprintf(command, "cat %s %s > %s", line_flags, TEST_FILES, CAT_OUTPUT);
+  printf("%s", command);
   system(command);
 }
 
