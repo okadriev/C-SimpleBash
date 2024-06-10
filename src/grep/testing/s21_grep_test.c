@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
       option = getchar() - '0';
       if (option < 0 || option > 5) {
         printf("You're miss :( Try again, you can do it!\n");
-        while (getchar() != '\n') continue;
+        while (getchar() != '\n');
       }
     }
 
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
       valgrind = getchar() - '0';
       if (option < 0 || option > 1) {
         printf("You're miss :( Try again, you can do it!\n");
-        while (getchar() != '\n') continue;
+        while (getchar() != '\n');
       }
     }
 
@@ -43,6 +43,9 @@ int main(int argc, char* argv[]) {
 }
 
 void start_testing(int option, int valgrind) {
+  unsigned seed = time(NULL);  // for "preset random" use fix number instead;
+  srand(seed);
+
   for (int max_flags = 0; max_flags <= option; max_flags++) {
     int tests_count = 1;
 
@@ -50,39 +53,38 @@ void start_testing(int option, int valgrind) {
 
     for (int test_id = 0; test_id < tests_count; test_id++) {
       printf("\033[1;37mTest %3d / %3d: \033[0m", test_id + 1, tests_count);
-      srand((int)time(NULL) + test_id);  // for preset random use (test_id) only
 
       char line_flags[200] = {0};
       int copy_id = test_id, param = 1;
-      char ch[2] = {0, '\0'};  // grep
+      char ch[2] = "x";
 
       for (int j = 0; j < max_flags; j++) {
         int flag_id = copy_id % FLAGS_COUNT;
         strcat(line_flags, flags[flag_id]);
-
         copy_id /= FLAGS_COUNT;
 
-        if (flag_id == 8) {                                              // grep
-          for (int i = rand() % 3 + 1; i > 0; i--) {                     // grep
-            do ch[0] = rand() % 128;                                     // grep
-            while (!isalnum(ch[0]));                                     // grep
-            strcat(line_flags, ch);                                      // grep
-          }                                                              // grep
-          strcat(line_flags, " ");                                       // grep
-          param = 0;                                                     // grep
-        }                                                                // grep
-        if (flag_id == 9) {                                              // grep
-          sprintf(line_flags + strlen(line_flags), PATH "test_%d.txt ",  // grep
-                  rand() % 5 + 1);                                       // grep
-          param = 0;                                                     // grep
-        }                                                                // grep
+        if (flag_id == 8) {
+          for (int i = rand() % 3 + 1; i > 0; i--) {
+            do ch[0] = rand() % 128;
+            while (!isalnum(ch[0]));
+
+            strcat(line_flags, ch);
+          }
+          strcat(line_flags, " ");
+          param = 0;
+
+        } else if (flag_id == 9) {
+          sprintf(line_flags + strlen(line_flags), PATH "test_%d.txt ",
+                  rand() % 5 + 1);
+          param = 0;
+        }
       }
 
-      for (int i = rand() % 3 + 1; param && i > 0; i--) {  // grep
-        do ch[0] = rand() % 128;                           // grep
-        while (!isalnum(ch[0]));                           // grep
-        strcat(line_flags, ch);                            // grep
-      }                                                    // grep
+      for (int i = rand() % 3 + 1; param && i > 0; i--) {
+        do ch[0] = rand() % 128;
+        while (!isalnum(ch[0]));
+        strcat(line_flags, ch);
+      }
 
       strcat(line_flags, " ");
       system_call(line_flags, valgrind);
@@ -92,17 +94,19 @@ void start_testing(int option, int valgrind) {
       if (error) {
         paint_pikachu(1);
 
-        // if (max_flags > 0)  // grep
-        printf("\033[1;37mWrong flag: %s\033[0m\n", line_flags);
-        // else                                     // grep
-        //   printf("Wrong work without flags\n");  // grep
-        printf("Output_compare: %s\n", error & 1 ? FAIL : SUCCESS);
-        printf("Valgrind: %s\n", error & 2 ? FAIL : SUCCESS);
+        if (max_flags > 0)
+          printf("\033[1;37mWrong flag: %s\033[0m\n", line_flags);
+        else
+          printf("Wrong work without flags\n");
 
-        exit(1);
+        printf("Current seed: %u\n", seed);
+        printf("Output_compare: %s", error & 1 ? FAIL : SUCCESS);
+        printf("Valgrind: %s", error & 2 ? FAIL : SUCCESS);
+
+        exit(0);
+      } else {
+        printf(SUCCESS);
       }
-
-      if (!error) printf(SUCCESS);
     }
   }
 
@@ -238,15 +242,15 @@ void create_test_2() {
 void create_test_3() {
   FILE* f = fopen(PATH "test_3.txt", "w");
 
-  /* for (int ch = 0; ch < 128; ch++) {  // ascii
+  /* for (int ch = 0; ch < 128; ch++) {  // ascii easy mode
     fprintf(f, "%c", ch);
   } */
-  for (int i = 0; i < 2000; i++) {           // grep
-    int ch = rand() % 128;                   // grep
-    while (!isalnum(ch)) ch = rand() % 128;  // grep
-    fprintf(f, "%c", ch);                    // grep
-    if (i % 10 == 9) fprintf(f, "\n");       // grep
-  }                                          // grep
+  for (int i = 0; i < 2000; i++) {
+    int ch = rand() % 128;
+    while (!isalnum(ch)) ch = rand() % 128;  // HARD MODE
+    fprintf(f, "%c", ch);
+    if (i % 10 == 9) fprintf(f, "\n");
+  }
 
   fclose(f);
 }
@@ -262,6 +266,7 @@ void create_test_4() {
 
 void create_test_5() {
   FILE* f = fopen(PATH "test_5.txt", "w");
-  fprintf(f, " ");
+  fprintf(f, " ");  // easy mode
+  // fprintf(f, ""); // HARD MODE
   fclose(f);
 }

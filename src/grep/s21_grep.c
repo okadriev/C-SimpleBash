@@ -3,7 +3,6 @@
 int main(int argc, char *argv[]) {
   int ERROR = 0;
   char *patterns = calloc(100, sizeof(char));
-  
   Flags flag = get_flags(argc, argv, &ERROR, &patterns);
 
   if (!ERROR) {
@@ -14,7 +13,7 @@ int main(int argc, char *argv[]) {
     regfree(&regex);
   }
 
-    free(patterns);
+  free(patterns);
   return !ERROR;
 }
 
